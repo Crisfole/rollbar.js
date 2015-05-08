@@ -891,6 +891,34 @@ describe("Notifier.log()", function() {
 
     done();
   });
+
+  it("should parse all stack frames it can", function(done) {
+    var notifier = new Notifier();
+    var spy = sinon.spy(notifier, "_log");
+
+    var e;
+    try {
+      // Will throw a DOMException
+      document.querySelectorAll('div:foo');
+    } catch (e2) {
+      e = e2;
+    }
+
+    notifier.log('custom DOMException message', e);
+
+    expect(spy.called).to.be.true;
+
+    var call = spy.getCall(0);
+    var level = call.args[0];
+    var message = call.args[1];
+    var err = call.args[2];
+
+    expect(level).to.be.equal('debug');
+    expect(message).to.be.equal('custom DOMException message');
+    expect(err).to.be.equal(e);
+
+    done();
+  });
 });
 
 
